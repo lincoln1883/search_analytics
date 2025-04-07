@@ -65,3 +65,4 @@ group :development do
   # gem "spring"
 end
 
+gem "sidekiq", "~> 8.0"

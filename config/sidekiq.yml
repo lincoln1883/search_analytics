@@ -1,0 +1,5 @@
+:concurrency: 5 # Adjust based on server resources
+:queues:
+  - default
+  - low
+# :timeout: 30 # Optional: max job run time
