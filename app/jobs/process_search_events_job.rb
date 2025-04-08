@@ -4,20 +4,23 @@ class ProcessSearchEventsJob < ApplicationJob
   WINDOW_DURATION = 15.seconds
   DEBOUNCE_GUARD = 4.seconds
 
-  def perform(ip_address, trigger_timestamp)
-    start_time = trigger_timestamp - WINDOW_DURATION
-    end_time = trigger_timestamp + DEBOUNCE_GUARD
+  def perform(ip_address, timestamp)
+    start_time = timestamp - WINDOW_DURATION
+    end_time = timestamp + DEBOUNCE_GUARD
 
-    relevant_events = SearchEvent.where(ip_address: ip_address)
-                                 .where(timestamp: start_time..end_time)
-                                 .order(timestamp: :asc)
+    events = SearchEvent.where(ip_address: ip_address)
+                       .where("timestamp <= ?", timestamp)
+                       .order(timestamp: :asc)
 
-    return if relevant_events.empty?
+    return if events.empty?
 
-    latest_event_in_window = relevant_events.last
-    return if latest_event_in_window.timestamp > trigger_timestamp + 1.second # Heuristic: User typed again very soon after trigger
+    final_event = events.last
+    return if final_event.query.blank?
 
-    longest_event = relevant_events.max_by { |event| [event.query.length, event.timestamp] }
+    latest_event_in_window = events.last
+    return if latest_event_in_window.timestamp > timestamp + 1.second
+
+    longest_event = events.max_by { |event| [event.query.length, event.timestamp] }
     final_query_text = longest_event.query
 
     recent_final_query_exists = SearchQuery.where(ip_address: ip_address)
