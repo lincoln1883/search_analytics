@@ -33,7 +33,7 @@ A Ruby on Rails application that tracks user search behavior and provides analyt
 
 1. Clone the repository:
 ```bash
-git clone [repository-url]
+git clone https://github.com/lincoln1883/search_analytics
 cd search_analytics
 ```
 

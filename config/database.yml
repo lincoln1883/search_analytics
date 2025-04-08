@@ -85,5 +85,4 @@ test:
 production:
   <<: *default
   database: search_analytics_production
-  username: search_analytics
-  password: <%= ENV["SEARCH_ANALYTICS_DATABASE_PASSWORD"] %>
+  url: <%= ENV["DATABASE_URL"] %>
