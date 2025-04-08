@@ -87,5 +87,4 @@ test:
 #
 production:
   <<: *default
-  database: search_analytics_production
   url: <%= ENV["DATABASE_URL"] %>
