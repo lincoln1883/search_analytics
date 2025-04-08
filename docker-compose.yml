@@ -6,8 +6,8 @@ services:
     image: search_analytics
     container_name: search_analytics_app
     environment:
-      RAILS_ENV: development
-      RAILS_MASTER_KEY: "${RAILS_MASTER_KEY}"  # Optional if you're using env_file
+      RAILS_ENV: production
+      RAILS_MASTER_KEY: "${RAILS_MASTER_KEY}"
     env_file:
       - .env
     ports:
@@ -17,6 +17,8 @@ services:
     command: ["./start.sh"]
     stdin_open: true
     tty: true
+    depends_on:
+      - db
 
   db:
     image: postgres:17.0
@@ -31,11 +33,20 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  redis:
-    image: redis:7-alpine
-    container_name: redis
-    ports:
-      - "6379:6379"
+  sidekiq:
+    build: .
+    image: search_analytics
+    container_name: search_analytics_sidekiq
+    command: ["bundle", "exec", "sidekiq"]
+    depends_on:
+      - db
+    environment:
+      RAILS_ENV: production
+      RAILS_MASTER_KEY: "${RAILS_MASTER_KEY}"
+      UPSTASH_REDIS_REST_URL: "${UPSTASH_REDIS_REST_URL}"
+      UPSTASH_REDIS_REST_TOKEN: "${UPSTASH_REDIS_REST_TOKEN}"
+    volumes:
+      - .:/rails
 
 volumes:
   postgres_data:
