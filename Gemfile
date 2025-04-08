@@ -66,5 +66,5 @@ group :development do
   # gem "spring"
 end
 
-gem "sidekiq", "~> 8.0"
+gem "sidekiq", "~> 7.0"
 gem 'foreman'

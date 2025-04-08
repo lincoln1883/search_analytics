@@ -127,7 +127,6 @@ GEM
     jbuilder (2.13.0)
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
-    json (2.10.2)
     logger (1.7.0)
     loofah (2.24.0)
       crass (~> 1.0.2)
@@ -249,12 +248,12 @@ GEM
       rspec-support (~> 3.13)
     rspec-support (3.13.2)
     securerandom (0.4.1)
-    sidekiq (8.0.2)
-      connection_pool (>= 2.5.0)
-      json (>= 2.9.0)
-      logger (>= 1.6.2)
-      rack (>= 3.1.0)
-      redis-client (>= 0.23.2)
+    sidekiq (7.3.9)
+      base64
+      connection_pool (>= 2.3.0)
+      logger
+      rack (>= 2.2.4)
+      redis-client (>= 0.22.2)
     sprockets (4.2.1)
       concurrent-ruby (~> 1.0)
       rack (>= 2.2.4, < 4)
@@ -320,7 +319,7 @@ DEPENDENCIES
   rails-controller-testing
   redis (>= 4.0.1)
   rspec-rails (~> 7.1)
-  sidekiq (~> 8.0)
+  sidekiq (~> 7.0)
   sprockets-rails
   stimulus-rails
   tailwindcss-rails
