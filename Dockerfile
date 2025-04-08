@@ -34,7 +34,7 @@ COPY . .
 RUN bundle exec bootsnap precompile app/ lib/
 
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-# ENV REDIS_URL=redis://localhost:6379/1
+ENV REDIS_URL=redis://localhost:6379/1
 RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
 # Final stage for app image
