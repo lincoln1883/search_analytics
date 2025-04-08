@@ -67,3 +67,4 @@ group :development do
 end
 
 gem "sidekiq", "~> 8.0"
+gem 'foreman'
