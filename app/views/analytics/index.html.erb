@@ -23,9 +23,9 @@
     <p class="text-gray-500">No search data from today yet.</p>
   <% end %>
 
-  <h2 class="text-xl font-semibold mt-6 mb-2">Recent Individual Searches (Last Hour - Demo)</h2>
+  <h2 class="text-xl font-semibold mt-6 mb-2">Recent Individual Searches (in the Last Hour)</h2>
   <% if @recent_user_searches.present? %>
-    <p class="text-sm text-red-600 mb-2">Warning: Displaying IPs for demonstration only. Anonymize in production.</p>
+    <!-- <p class="text-sm text-red-600 mb-2">Warning: Displaying IPs for demonstration only. Anonymize in production.</p> -->
     <div class="space-y-2">
       <% @recent_user_searches.group_by(&:ip_address).each do |ip, searches| %>
         <div>
