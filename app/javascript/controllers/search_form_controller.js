@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = [ "query" ]
+  static targets = [ "query", "feedback" ]
   static values = {
     debounceWait: { type: Number, default: 500 }
   }
@@ -16,6 +16,12 @@ export default class extends Controller {
 
   handleInput(event) {
     const queryValue = this.queryTarget.value.trim()
+    
+    if (queryValue) {
+      this.showFeedback(`Typing: "${queryValue}"`)
+    } else {
+      this.showFeedback("Start typing your search...")
+    }
 
     this.clearDebounceTimer()
 
@@ -30,34 +36,43 @@ export default class extends Controller {
     }
   }
 
+  showFeedback(message) {
+    if (this.hasFeedbackTarget) {
+      this.feedbackTarget.textContent = message
+    }
+  }
+
   async performSearch(query) {
     if (query === null || query === undefined || query === "") {
-        console.log("Debounced search triggered with empty query. Skipping.")
+      this.showFeedback("Search query is empty. Please type something.")
       return;
     }
 
-    console.log(`Debounced search for: "${query}"`)
+    this.showFeedback(`Searching for: "${query}"`)
 
     const url = '/searches';
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
     try {
-      const response = await post(url, {
+      const response = await fetch(url, {
+          method: 'POST',
           body: JSON.stringify({ query: query }),
-          responseKind: 'turbo-stream',
           headers: {
             'Content-Type': 'application/json',
-            'Accept': 'text/vnd.turbo-stream.html, text/html, application/xhtml+xml'
+            'Accept': 'text/vnd.turbo-stream.html, text/html, application/xhtml+xml',
+            'X-CSRF-Token': csrfToken
           }
       });
 
       if (!response.ok) {
-          console.error("Search request failed:", response.statusText);
+          this.showFeedback(`Error: Search request failed - ${response.statusText}`)
           return;
       }
       
+      this.showFeedback(`Search for "${query}" submitted successfully, just hit enter to submit your search.`)
 
     } catch (error) {
-      console.error("Error submitting search:", error);
+      this.showFeedback(`Error submitting search: ${error.message}`)
       return;
     }
   }

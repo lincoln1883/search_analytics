@@ -1,21 +1,122 @@
-<div class="container mx-auto p-8">
-  <div class="flex justify-between items-center mb-4">
-    <%= link_to 'analytics', analytics_path, class: "text-blue-500 hover:underline" %>
+<div class="container flex flex-col min-h-screen">
+  <div class="flex flex-col items-center justify-center pt-16 px-4 -mt-16">
+
+    <div class="mb-8 text-center">
+      <h1 class="text-7xl font-normal">
+        <span class="text-blue-500">S</span><span class="text-red-500">e</span><span
+          class="text-yellow-500">a</span><span class="text-blue-500">r</span><span class="text-green-500">c</span><span
+          class="text-red-500">h</span>
+      </h1>
+    </div>
+
+    <div class="w-full max-w-2xl">
+      <%= form_with url: searches_path, method: :post, data: { controller: "search-form" ,
+        action: "input->search-form#handleInput" } do |form| %>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+
+          <%= form.text_field :query, id: 'search-input' ,
+            class: "w-full py-3 pl-12 pr-4 text-gray-700 bg-white border rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            placeholder: "Search anything...", autocomplete: "off", data: { search_form_target: "query" } %>
+        </div>
+
+        <div class="mt-2 text-sm text-gray-600 italic text-center" data-search-form-target="feedback">
+          Start typing your search...
+        </div>
+        <% end %>
+        <div class="mt-4 text-center">
+          <%= turbo_frame_tag "search_results" , class: "mt-8 w-full" do %>
+          <% end %>
+        </div>
+    </div>
   </div>
-  <h1 class="text-2xl font-bold mb-4">Search Anything</h1>
 
-  <%= form_with url: searches_path, method: :post,
-                data: { controller: "search-form", action: "input->search-form#handleInput" } do |form| %>
-    <%= form.text_field :query,
-                        id: 'search-input',
-                        class: "w-full p-2 border border-gray-300 rounded mb-4",
-                        placeholder: "Type your search here...",
-                        autocomplete: "off",
-                        data: { search_form_target: "query" }
-                        %>
-  <% end %>
+  <div id="analytics" class="w-full max-w-4xl mx-auto mt-24 px-6 pb-16">
+    <div class="flex items-center justify-between mb-8 border-b pb-2">
+      <h2 class="text-2xl font-semibold text-gray-800">Search Analytics</h2>
+      <div class="text-sm text-gray-500">Updated: <%= Time.current.strftime('%B %d, %Y %H:%M') %>
+      </div>
+    </div>
 
-  <%= turbo_frame_tag "search_results", class: "mt-4" do %>
-    <p class="text-gray-500">Start typing your search...</p>
-  <% end %>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+        <h3 class="text-lg font-medium text-gray-800 mb-4">Top 20 Overall Searches</h3>
+        <% if @top_searches.present? %>
+          <ul class="space-y-2">
+            <% @top_searches.each do |query, count| %>
+              <li class="flex justify-between items-center">
+                <span
+                  class="font-mono text-sm bg-gray-50 px-2 py-1 rounded text-blue-600 hover:underline cursor-pointer">
+                  <%= query %>
+                </span>
+                <span class="text-sm bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                  <%= count %>
+                </span>
+              </li>
+              <% end %>
+          </ul>
+          <% else %>
+            <p class="text-gray-500 text-center py-4">No search data yet.</p>
+            <% end %>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+        <h3 class="text-lg font-medium text-gray-800 mb-4">Top 10 Searches Today</h3>
+        <% if @top_searches_today.present? %>
+          <ul class="space-y-2">
+            <% @top_searches_today.each do |query, count| %>
+              <li class="flex justify-between items-center">
+                <span
+                  class="font-mono text-sm bg-gray-50 px-2 py-1 rounded text-blue-600 hover:underline cursor-pointer">
+                  <%= query %>
+                </span>
+                <span class="text-sm bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                  <%= count %>
+                </span>
+              </li>
+              <% end %>
+          </ul>
+          <% else %>
+            <p class="text-gray-500 text-center py-4">No search data from today yet.</p>
+            <% end %>
+      </div>
+    </div>
+
+    <div class="mt-6 bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+      <h3 class="text-lg font-medium text-gray-800 mb-4">Recent Searches (Last Hour)</h3>
+      <% if @recent_user_searches.present? %>
+        <div class="space-y-3">
+          <% @recent_user_searches.group_by(&:ip_address).each do |ip, searches| %>
+            <div class="p-3 bg-gray-50 rounded-md">
+              <div class="flex justify-between">
+                <span class="text-xs text-gray-500">User ID: <%= ip.split('.').last(2).join('-') %></span>
+                <span class="text-xs text-gray-500">
+                  <%= searches.first.timestamp.strftime('%H:%M:%S') %>
+                </span>
+              </div>
+              <div class="mt-1 font-mono text-sm text-blue-600 hover:underline cursor-pointer">
+                <%= searches.first.final_query %>
+              </div>
+            </div>
+            <% end %>
+        </div>
+        <% else %>
+          <p class="text-gray-500 text-center py-4">No recent individual search data.</p>
+          <% end %>
+    </div>
+  </div>
+
+  <footer class="mt-auto p-4 bg-gray-100 text-sm text-gray-600">
+    <div class="container mx-auto flex justify-between items-center">
+      <div>Search Analytics Demo</div>
+      <div>&copy; <%= Date.today.year %>
+      </div>
+    </div>
+  </footer>
 </div>
