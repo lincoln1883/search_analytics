@@ -69,7 +69,7 @@ export default class extends Controller {
           return;
       }
       
-      this.showFeedback(`Search for "${query}" submitted successfully, just hit enter to submit your search.`)
+      this.showFeedback(`Search for "${query}", just hit enter to submit your search.`)
 
     } catch (error) {
       this.showFeedback(`Error submitting search: ${error.message}`)
