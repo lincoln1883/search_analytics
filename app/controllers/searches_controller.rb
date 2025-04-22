@@ -1,20 +1,30 @@
 class SearchesController < ApplicationController
+  helper AnalyticsHelper # Ensure the helper is available
+
   def index
-    # Add analytics data to the search page
-    @top_searches = SearchQuery.group(:final_query)
-                               .order('count_final_query DESC')
-                               .limit(20)
-                               .count(:final_query)
+    # Fetch top searches
+    top_searches_raw = SearchQuery.group(:final_query)
+                                  .order('count_final_query DESC')
+                                  .limit(20)
+                                  .count(:final_query)
 
-    @top_searches_today = SearchQuery.where("created_at >= ?", 24.hours.ago)
-                                     .group(:final_query)
-                                     .order('count_final_query DESC')
-                                     .limit(10)
-                                     .count(:final_query)
+    top_searches_today_raw = SearchQuery.where("created_at >= ?", 24.hours.ago)
+                                        .group(:final_query)
+                                        .order('count_final_query DESC')
+                                        .limit(10)
+                                        .count(:final_query)
 
-    @recent_user_searches = SearchQuery.where("created_at >= ?", 1.hour.ago)
-                                        .select(:ip_address, :final_query, :timestamp)
-                                        .order(ip_address: :asc, timestamp: :desc)
+    # Apply filtering to top searches
+    @filtered_top_searches = helpers.filter_top_searches(top_searches_raw)
+    @filtered_top_searches_today = helpers.filter_top_searches(top_searches_today_raw)
+
+    # Fetch and filter recent searches (as done previously)
+    recent_user_searches_raw = SearchQuery.where("created_at >= ?", 1.hour.ago)
+                                          .select(:ip_address, :final_query, :timestamp)
+                                          .order(ip_address: :asc, timestamp: :desc)
+    @filtered_recent_searches = recent_user_searches_raw.group_by(&:ip_address).transform_values do |searches|
+      helpers.filter_searches_by_longest_start_word(searches)
+    end
   end
 
   def create
